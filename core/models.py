@@ -1,67 +1,46 @@
+from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.db import models
-
-from django.contrib.auth.models import User
+from multiselectfield import MultiSelectField
+from django.utils.translation import gettext_lazy as _
 from django.core.validators import RegexValidator
 from django.utils import timezone
-# Create your models here.
+from .managers  import CustomUserManager
+from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
+from django.db import models
 from multiselectfield import MultiSelectField
-
-from django.contrib.auth.models import AbstractUser, AbstractBaseUser
 from django.utils.translation import gettext_lazy as _
-
-from .managers import CustomUserManager
-
-from django.contrib.auth.models import PermissionsMixin
-
+from django.core.validators import RegexValidator
+from django.utils import timezone
 from django.db.models import Q
 
+# Model Managers for proxy models
+class SellerManager(models.Manager):
+    def get_queryset(self, *args, **kwargs):
+        return super().get_queryset(*args, **kwargs).filter(Q(type__contains=CustomUser.Types.SELLER))
 
-# class UserType(models.Model):
-#     CUSTOMER = 1
-#     SELLER = 2
-#     TYPE_CHOICES = (
-#         (SELLER, 'Seller'),
-#         (CUSTOMER, 'Customer')
-#     )
+class CustomerManager(models.Manager):
+    def get_queryset(self, *args, **kwargs):
+        return super().get_queryset(*args, **kwargs).filter(Q(type__contains=CustomUser.Types.CUSTOMER))
 
-#     id = models.PositiveSmallIntegerField(choices=TYPE_CHOICES, primary_key=True)
 
-#     def __str__(self):
-#         return self.get_id_display()
 
+
+# Model Managers for proxy models
+# ... (Same as before)
 
 class CustomUser(AbstractBaseUser, PermissionsMixin):
-    # username = None
     email = models.EmailField(_('email address'), unique=True)
     name = models.CharField(max_length=255)
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     date_joined = models.DateTimeField(default=timezone.now)
 
-    # is_customer = models.BooleanField(default=True)
-    # is_seller = models.BooleanField(default = False)
-
-    # type = (
-    #     (1, 'Seller'),
-    #     (2, 'Customer')
-    # )
-    # user_type = models.IntegerField(choices = type, default=1)
-
-    #usertype = models.ManyToManyField(UserType)
-
     class Types(models.TextChoices):
         SELLER = "Seller", "SELLER"
         CUSTOMER = "Customer", "CUSTOMER"
-    
-    
 
     default_type = Types.CUSTOMER
-
-    #type = models.CharField(_('Type'), max_length=255, choices=Types.choices, default=default_type)
-    type = MultiSelectField(choices=Types.choices,max_length=100,default=[], null=True, blank=True)
-
-
-
+    type = MultiSelectField(choices=Types.choices, max_length=100, default=[], null=True, blank=True)
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
@@ -69,57 +48,51 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     objects = CustomUserManager()
 
     def __str__(self):
-        return self.email
+        return str(self.email)
+
 
     groups = models.ManyToManyField(
         'auth.Group',
         verbose_name='groups',
         blank=True,
-        related_name='custom_users'  # Change 'custom_users' to a unique related name
+        related_name='custom_users'
     )
 
     user_permissions = models.ManyToManyField(
         'auth.Permission',
         verbose_name='user permissions',
         blank=True,
-        related_name='custom_users_permissions'  # Change 'custom_users_permissions' to a unique related name
+        related_name='custom_users_permissions'
     )
     
-    #place here
-        # if not the code below then taking default value in User model not in proxy models
     def save(self, *args, **kwargs):
-        print(self.id)
         if not self.id:
-            self.type = self.default_type
+            self.type.append(self.default_type)
         return super().save(*args, **kwargs)
 
 
+
 class CustomerAdditional(models.Model):
-    user = models.OneToOneField(CustomUser, on_delete = models.CASCADE)
+    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
     address = models.CharField(max_length=1000)
 
 
 class SellerAdditional(models.Model):
-    user = models.OneToOneField(CustomUser, on_delete = models.CASCADE)
+    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE,unique=True)
     gst = models.CharField(max_length=10)
     warehouse_location = models.CharField(max_length=1000)
-
-# Model Managers for proxy models
-class SellerManager(models.Manager):
-    def get_queryset(self, *args, **kwargs):
-        #return super().get_queryset(*args, **kwargs).filter(type = CustomUser.Types.SELLER)
-        return super().get_queryset(*args, **kwargs).filter(Q(type__contains = CustomUser.Types.SELLER))
-
-class CustomerManager(models.Manager):
-    def get_queryset(self, *args, **kwargs):
-        #return super().get_queryset(*args, **kwargs).filter(type = CustomUser.Types.CUSTOMER)
-        return super().get_queryset(*args, **kwargs).filter(Q(type__contains = CustomUser.Types.CUSTOMER))
+    
+    
+    
+    def __str__(self):
+        return self.user.email
+    
 
 
-# Proxy Models. They do not create a seperate table
 class Seller(CustomUser):
     default_type = CustomUser.Types.SELLER
     objects = SellerManager()
+
     class Meta:
         proxy = True
     
@@ -133,6 +106,7 @@ class Seller(CustomUser):
 class Customer(CustomUser):
     default_type = CustomUser.Types.CUSTOMER
     objects = CustomerManager()
+
     class Meta:
         proxy = True 
 
@@ -143,12 +117,9 @@ class Customer(CustomUser):
     def showAdditional(self):
         return self.customeradditional
 
-
-
 class Contact(models.Model):
     email = models.EmailField()
     name = models.CharField(max_length=5)
-    phone_regex = RegexValidator( regex = r'^\d{10}$',message = "phone number should exactly be in 10 digits")
+    phone_regex = RegexValidator(regex=r'^\d{10}$', message="Phone number should be exactly 10 digits")
     phone = models.CharField(max_length=255, validators=[phone_regex])
     query = models.TextField()
-

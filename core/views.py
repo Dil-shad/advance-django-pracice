@@ -1,10 +1,12 @@
 from django.shortcuts import render
 from django.views.generic import TemplateView, FormView,CreateView
+from django.contrib.auth.views import LoginView , LogoutView
 from django.core.exceptions import ValidationError
-from .forms import ContactUsForm,RegistrationForm,RegistrationFormSeller
+from .forms import ContactUsForm,RegistrationForm,RegistrationFormSeller,RegistrationFormSeller2
 from django.shortcuts import render, HttpResponse, redirect
 from django.urls import reverse_lazy
 from .models import CustomUser,SellerAdditional
+from django.contrib.auth.mixins import LoginRequiredMixin
 # Create your views here.
 
 
@@ -123,5 +125,31 @@ class RegisterView(CreateView):
     template_name = 'registerbasicuser.html'
     form_class = RegistrationForm
     success_url = reverse_lazy('core:index')
+    
+
+class LoginViewUser(LoginView):
+    template_name = "login.html"
+    success_url = reverse_lazy('core:index')
+
+
+    
+class RegisterViewSeller(LoginRequiredMixin,CreateView):
+    template_name = 'registerseller2.html' 
+    form_class = RegistrationFormSeller2
+    success_url = reverse_lazy('core:index')
+    
+    def form_valid(self, form):
+        user = self.request.user
+        user.type.append(user.Types.SELLER)
+        user.save()
+        form.instance.user = self.request.user
+        return super().form_valid(form)
+    
+     
+class LogoutViewUser(LogoutView):
+    success_url=reverse_lazy('core:index')
+    
+        
+          
     
     
