@@ -1,6 +1,7 @@
 {% load hosts %}
 <!doctype html>
 <html lang="en">
+ 
   <head>
     <!-- Required meta tags -->
     <meta charset="utf-8">
@@ -24,7 +25,7 @@
   <body>
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
       <div class="container-fluid">
-        <a class="navbar-brand" href="#">Navbar</a>
+        <a class="navbar-brand" href="#">WonderShop Seller</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
         </button>
@@ -34,6 +35,7 @@
               <a class="nav-link active" aria-current="page" href="/">Home</a>
             </li>
             <li class="nav-item">
+              {% comment %} <a class="nav-link " href="{% url 'contactus' %}" tabindex="-1" aria-disabled="true">Contactus</a> {% endcomment %}
               <a class="nav-link " href="{% host_url 'contactus' host 'www' %}" tabindex="-1" aria-disabled="true">Contactus</a>
             </li>
             <li class="nav-item">
@@ -61,14 +63,16 @@
               Account
             </button>
             <ul class="dropdown-menu">
-              {% comment %} <li><a class="dropdown-item" href="{% url 'core:signup' %}">Signup</a></li>
               
-              <li><a class="dropdown-item" href="{% url 'core:login' %}">Login</a></li>
-              <li><a class="dropdown-item" href="{% url 'core:logout' %}">Logout</a></li> {% endcomment %}
+              {% comment %} <li><a class="dropdown-item" href="{% url 'seller:signupseller' %}">Signup for Seller</a></li>
+              <li><a class="dropdown-item" href="{% url 'seller:login' %}">Login</a></li>
+              <li><a class="dropdown-item" href="{% url 'seller:logout' %}">Logout</a></li> {% endcomment %}
 
-              <li><a class="dropdown-item" href="{% host_url 'signup' host 'www' %}">Signup</a></li>
-              <li><a class="dropdown-item" href="{% host_url 'login' host 'www' %}">Login</a></li>
-              <li><a class="dropdown-item" href="{% host_url 'logout' host 'www' %}">Logout</a></li>
+              <li><a class="dropdown-item" href="{% host_url 'signupseller' host 'services' %}">Singup For Seller</a></li>
+              <li><a class="dropdown-item" href="{% host_url 'signup' host 'services' %}">Singup</a></li>
+              
+              <li><a class="dropdown-item" href="{% host_url 'login' host 'services' %}">Login</a></li>
+              <li><a class="dropdown-item" href="{% host_url 'logout' host 'services' %}">Logout</a></li>
             </ul>
           </div>
 
@@ -78,7 +82,7 @@
 
     <div class="">
       {% block body %}
-    
+      
       {% endblock body %}
     </div>
    

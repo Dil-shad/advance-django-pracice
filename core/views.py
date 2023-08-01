@@ -133,17 +133,17 @@ class LoginViewUser(LoginView):
 
 
     
-class RegisterViewSeller(LoginRequiredMixin,CreateView):
-    template_name = 'registerseller2.html' 
-    form_class = RegistrationFormSeller2
-    success_url = reverse_lazy('core:index')
+# class RegisterViewSeller(LoginRequiredMixin,CreateView):
+#     template_name = 'registerseller2.html' 
+#     form_class = RegistrationFormSeller2
+#     success_url = reverse_lazy('core:index')
     
-    def form_valid(self, form):
-        user = self.request.user
-        user.type.append(user.Types.SELLER)
-        user.save()
-        form.instance.user = self.request.user
-        return super().form_valid(form)
+#     def form_valid(self, form):
+#         user = self.request.user
+#         user.type.append(user.Types.SELLER)
+#         user.save()
+#         form.instance.user = self.request.user
+#         return super().form_valid(form)
     
      
 class LogoutViewUser(LogoutView):

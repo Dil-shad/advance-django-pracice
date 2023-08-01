@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-kwnp3#o%oqy-5@ix*77l=vzcvzubk=vheym+jrpj&uzn!55!x=
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['www.wondershop.in', 'services.wondershop.in', '127.0.0.1' ]
 
 
 # Application definition
@@ -37,11 +37,16 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    
+    
     'core',
+    'seller',
+    'django_hosts',
     
 ]
 
 MIDDLEWARE = [
+    'django_hosts.middleware.HostsRequestMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -49,9 +54,16 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django_hosts.middleware.HostsResponseMiddleware'
 ]
 
+
 ROOT_URLCONF = 'Ecommerceprojct.urls'
+ROOT_HOSTCONF = 'Ecommerceprojct.hosts'
+DEFAULT_HOST = 'services'
+PARENT_HOST = 'wondershop.in'
+HOST_PORT = "8000"
+
 
 TEMPLATES = [
     {

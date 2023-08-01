@@ -13,6 +13,23 @@ from django.core.validators import RegexValidator
 from django.utils import timezone
 from django.db.models import Q
 
+
+
+class LowercaseEmailField(models.EmailField):
+    """
+    Override EmailField to convert emails to lowercase before saving.
+    """
+    def to_python(self, value):
+        """
+        Convert email to lowercase.
+        """
+        value = super(LowercaseEmailField, self).to_python(value)
+        # Value can be None so check that it's a string before lowercasing.
+        if isinstance(value, str):
+            return value.lower()
+        return value
+
+
 # Model Managers for proxy models
 class SellerManager(models.Manager):
     def get_queryset(self, *args, **kwargs):
@@ -29,7 +46,7 @@ class CustomerManager(models.Manager):
 # ... (Same as before)
 
 class CustomUser(AbstractBaseUser, PermissionsMixin):
-    email = models.EmailField(_('email address'), unique=True)
+    email = LowercaseEmailField(_('email address'), unique=True)
     name = models.CharField(max_length=255)
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
