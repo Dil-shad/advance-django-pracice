@@ -1,11 +1,11 @@
 from django.shortcuts import render
-from django.views.generic import TemplateView, FormView,CreateView
-from django.contrib.auth.views import LoginView , LogoutView
+from django.views.generic import TemplateView, FormView, CreateView
+from django.contrib.auth.views import LoginView, LogoutView
 from django.core.exceptions import ValidationError
-from .forms import ContactUsForm,RegistrationForm,RegistrationFormSeller,RegistrationFormSeller2
+from .forms import ContactUsForm, RegistrationForm, RegistrationFormSeller, RegistrationFormSeller2
 from django.shortcuts import render, HttpResponse, redirect
 from django.urls import reverse_lazy
-from .models import CustomUser,SellerAdditional
+from .models import CustomUser, SellerAdditional
 from django.contrib.auth.mixins import LoginRequiredMixin
 # Create your views here.
 
@@ -63,8 +63,8 @@ def contactus2(request):
 class ContactUs(FormView):
     form_class = ContactUsForm
     template_name = 'contactus2.html'
-    #success_url = '/' #hardcoded url
-    success_url= reverse_lazy('core:index')
+    # success_url = '/' #hardcoded url
+    success_url = reverse_lazy('core:index')
 
     def form_valid(self, form):
         query = form.cleaned_data.get('query')
@@ -83,7 +83,7 @@ class ContactUs(FormView):
                 '__all__', 'Query length should be more than 10 characters.')
         response = super().form_invalid(form)
         return response
-    
+
 
 # class RegisterViewSeller(CreateView):
 #     template_name = 'registerseller.html'
@@ -100,7 +100,7 @@ class ContactUs(FormView):
     #         return response
     #     else:
     #         return response
-    #---------------OR-------------
+    # ---------------OR-------------
     # def form_valid(self, form):
     #     # Call the parent form_valid method to save the form data
     #     response = super().form_valid(form)
@@ -120,36 +120,29 @@ class ContactUs(FormView):
     #     return response
 
 
-
 class RegisterView(CreateView):
     template_name = 'registerbasicuser.html'
     form_class = RegistrationForm
     success_url = reverse_lazy('core:index')
-    
+
 
 class LoginViewUser(LoginView):
     template_name = "login.html"
     success_url = reverse_lazy('core:index')
 
 
-    
 # class RegisterViewSeller(LoginRequiredMixin,CreateView):
-#     template_name = 'registerseller2.html' 
+#     template_name = 'registerseller2.html'
 #     form_class = RegistrationFormSeller2
 #     success_url = reverse_lazy('core:index')
-    
+
 #     def form_valid(self, form):
 #         user = self.request.user
 #         user.type.append(user.Types.SELLER)
 #         user.save()
 #         form.instance.user = self.request.user
 #         return super().form_valid(form)
-    
-     
+
+
 class LogoutViewUser(LogoutView):
-    success_url=reverse_lazy('core:index')
-    
-        
-          
-    
-    
+    success_url = reverse_lazy('core:index')

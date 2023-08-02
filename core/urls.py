@@ -1,11 +1,12 @@
 from django.urls import path
 from. import views
+from django.contrib import admin
 
 
 app_name = 'core'
 
 urlpatterns = [
-
+    path('admin/', admin.site.urls),
     path("", views.Index.as_view(), name="index"),
     path("contactusclass", views.ContactUs.as_view(), name="contactusclass"),
     path("contactus", views.Contactus, name="contactus"),

@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-kwnp3#o%oqy-5@ix*77l=vzcvzubk=vheym+jrpj&uzn!55!x=
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['www.wondershop.in', 'services.wondershop.in', '127.0.0.1' ]
+ALLOWED_HOSTS = ['www.wondershop.in', 'services.wondershop.in', '127.0.0.1', 'admin.wondershop.in']
 
 
 # Application definition
@@ -60,7 +60,7 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'Ecommerceprojct.urls'
 ROOT_HOSTCONF = 'Ecommerceprojct.hosts'
-DEFAULT_HOST = 'services'
+DEFAULT_HOST = 'www'
 PARENT_HOST = 'wondershop.in'
 HOST_PORT = "8000"
 
@@ -142,6 +142,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'core.CustomUser'
 
 
-LOGIN_URL = '/login'
-LOGIN_REDIRECT_URL = 'core:index'
-LOGOUT_REDIRECT_URL = 'core:index'
+LOGIN_URL = 'login'
+LOGIN_REDIRECT_URL = 'index'
+LOGOUT_REDIRECT_URL = 'index'
