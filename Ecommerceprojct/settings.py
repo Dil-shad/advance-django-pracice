@@ -45,6 +45,26 @@ INSTALLED_APPS = [
     
 ]
 
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'my_cache_table',
+    }
+}
+
+#SESSION_ENGINE = "django.contrib.sessions.backends.db"
+
+SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+#SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
+#SESSION_ENGINE = "django.contrib.sessions.backends.file"
+#SESSION_FILE_PATH = r"/home/dil_shad/Documents/practical/Ecommerceprojct"
+#SESSION_ENGINE = "django.contrib.sessions.backends.cached_db"
+#SESSION_CACHE_ALIAS
+
+
+
+
+
 MIDDLEWARE = [
     'django_hosts.middleware.HostsRequestMiddleware',
     'django.middleware.security.SecurityMiddleware',
@@ -56,6 +76,12 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django_hosts.middleware.HostsResponseMiddleware'
 ]
+
+
+
+
+
+
 
 
 ROOT_URLCONF = 'Ecommerceprojct.urls'

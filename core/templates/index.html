@@ -123,19 +123,24 @@
 {% block body%}
 
 <main>
+    {% if user.is_authenticated %}
+    <h4>{{ user.name }}</h4>
+    {{ request.session.test }}
+{% endif %}
+
     Hello World!
 
-{{age}}
-{{array}}
-{% for i in array %}
-{{i}}
-{% endfor %}
-{{dic}}
-{% for key,value in dic.items %}
-{{key}} {{value}}
-{% endfor %}
-<br>
-{{dic.a}}
+    {{age}}
+    {{array}}
+    {% for i in array %}
+    {{i}}
+    {% endfor %}
+    {{dic}}
+    {% for key,value in dic.items %}
+    {{key}} {{value}}
+    {% endfor %}
+    <br>
+    {{dic.a}}
     <div id="myCarousel" class="carousel slide" data-bs-ride="carousel">
         <ol class="carousel-indicators">
             <li data-bs-target="#myCarousel" data-bs-slide-to="0" class="active"></li>
@@ -146,10 +151,11 @@
             <div class="carousel-item active">
                 <svg class="bd-placeholder-img" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg"
                     aria-hidden="true" preserveAspectRatio="xMidYMid slice" focusable="false">
-                    <rect width="100%" height="100%" fill="#777" /></svg>
+                    <rect width="100%" height="100%" fill="#777" />
+                </svg>
 
-                    <div class="container">
-                        <div class="carousel-caption text-start">
+                <div class="container">
+                    <div class="carousel-caption text-start">
                         <h1>Example headline.</h1>
                         <p>Cras justo odio, dapibus ac facilisis in, egestas eget quam. Donec id elit non mi porta
                             gravida at eget metus. Nullam id dolor id nibh ultricies vehicula ut id elit.</p>
@@ -160,7 +166,8 @@
             <div class="carousel-item">
                 <svg class="bd-placeholder-img" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg"
                     aria-hidden="true" preserveAspectRatio="xMidYMid slice" focusable="false">
-                    <rect width="100%" height="100%" fill="#777" /></svg>
+                    <rect width="100%" height="100%" fill="#777" />
+                </svg>
 
                 <div class="container">
                     <div class="carousel-caption">
@@ -174,7 +181,8 @@
             <div class="carousel-item">
                 <svg class="bd-placeholder-img" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg"
                     aria-hidden="true" preserveAspectRatio="xMidYMid slice" focusable="false">
-                    <rect width="100%" height="100%" fill="#777" /></svg>
+                    <rect width="100%" height="100%" fill="#777" />
+                </svg>
 
                 <div class="container">
                     <div class="carousel-caption text-end">

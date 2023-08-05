@@ -21,6 +21,19 @@ urlpatterns = [
     path('logout/', views.LogoutViewUser.as_view(), name="logout"),
     path('activate/<uidb64>/<token>', views.activate, name='activate'),
     path('example', views.example_view, name="example"),
+    path('testsession',views.testsession, name="testsession"),
+
+
+
+
+
+
+
+
+
+
+
+
 
 
     # change password
