@@ -17,13 +17,13 @@ def index(request):
 
 class LoginViewUser(LoginView):
     template_name = "seller/login.html"
-    success_url = reverse_lazy('seller:index')
+    success_url = reverse_lazy('index')
 
 
 class RegisterViewSeller(LoginRequiredMixin, CreateView):
     template_name = 'seller/register.html'
     form_class = RegistrationFormSeller2
-    success_url = reverse_lazy('seller:index')
+    success_url = reverse_lazy('index')
 
     def form_valid(self, form):
         user = self.request.user
@@ -34,10 +34,10 @@ class RegisterViewSeller(LoginRequiredMixin, CreateView):
 
 
 class LogoutViewUser(LogoutView):
-    success_url = reverse_lazy('seller:index')
+    success_url = reverse_lazy('index')
 
 
 class RegisterView(CreateView):
     template_name = 'seller/registerbaseuser.html'
     form_class = RegistrationForm
-    success_url = reverse_lazy('seller:index')
+    success_url = reverse_lazy('index')

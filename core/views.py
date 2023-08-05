@@ -9,6 +9,26 @@ from .models import CustomUser, SellerAdditional
 from django.contrib.auth.mixins import LoginRequiredMixin
 # Create your views here.
 
+from django.core.mail import EmailMessage, send_mail
+from .tokens import account_activation_token
+from django.contrib.sites.shortcuts import get_current_site
+from django.utils.encoding import force_bytes, force_str
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.template.loader import render_to_string
+from django.contrib.auth import authenticate, login, logout
+from django.contrib import messages
+from Ecommerceprojct import settings
+
+from django.contrib.auth import views as auth_views
+from django.contrib.auth.views import PasswordResetConfirmView
+from django.contrib.auth.models import User
+from django.shortcuts import render, redirect
+from django.contrib.auth.tokens import default_token_generator
+from django.contrib.auth import get_user_model, update_session_auth_hash
+from django.contrib.auth.forms import SetPasswordForm
+from django.contrib import messages
+
+
 
 # def index(request):
 #     return render(request, 'index.html')
@@ -64,7 +84,7 @@ class ContactUs(FormView):
     form_class = ContactUsForm
     template_name = 'contactus2.html'
     # success_url = '/' #hardcoded url
-    success_url = reverse_lazy('core:index')
+    success_url = reverse_lazy('index')
 
     def form_valid(self, form):
         query = form.cleaned_data.get('query')
@@ -88,7 +108,7 @@ class ContactUs(FormView):
 # class RegisterViewSeller(CreateView):
 #     template_name = 'registerseller.html'
 #     form_class = RegistrationFormSeller
-#     success_url = reverse_lazy('core:index')
+#     success_url = reverse_lazy('index')
 
     # def post(self, request, *args, **kwargs):
     #     response = super().post(request, *args, **kwargs)
@@ -123,26 +143,113 @@ class ContactUs(FormView):
 class RegisterView(CreateView):
     template_name = 'registerbasicuser.html'
     form_class = RegistrationForm
-    success_url = reverse_lazy('core:index')
+    success_url = reverse_lazy('index')
+    
+    def post(self, request, *args, **kwargs):
+        #form = RegistrationForm(request.POST)
+        user_email = request.POST.get('email')
+        try:
+            existing_user = CustomUser.objects.get(email = user_email)
+            if(existing_user.is_active == False):
+                existing_user.delete()
+        except:
+            pass
+        response = super().post(request, *args, **kwargs)
+        if response.status_code == 302:
+            # 302 is http response sttus code
+            user = CustomUser.objects.get(email = user_email)
+            user.is_active = False
+            user.save()
+            current_site = get_current_site(request)     #www.wondershop.in:8000
+            mail_subject = 'Activate your account.'
+            message = render_to_string('registration/acc_active_email.html', {
+                'user': user,
+                'domain': current_site.domain,
+                'uid':urlsafe_base64_encode(force_bytes(user.pk)),
+                'token':account_activation_token.make_token(user),
+            })
+            print(message)
+            to_email = user_email   
+            #form = RegistrationForm(request.POST)   # here we are again calling all its validations
+            form = self.get_form()
+            try:
+                send_mail(
+                    subject=mail_subject,
+                    message=message,
+                    from_email=settings.EMAIL_HOST_USER,
+                    recipient_list= [to_email],
+                    fail_silently=False,    # if it fails due to some error or email id then it get silenced without affecting others
+                )
+                messages.success(request, "link has been sent to your email id. please check your inbox and if its not there check your spam as well.")
+                return self.render_to_response({'form':form})
+            except:
+                form.add_error('', 'Error Occured In Sending Mail, Try Again')
+                messages.error(request, "Error Occured In Sending Mail, Try Again")
+                return self.render_to_response({'form':form})
+        else:
+            return response
+
+
+def activate(request, uidb64, token):
+    try:
+        uid = force_str(urlsafe_base64_decode(uidb64))
+        user = CustomUser.objects.get(pk=uid)
+    except(TypeError, ValueError, OverflowError, CustomUser.DoesNotExist) as e:
+        user = None
+    if user is not None and account_activation_token.check_token(user, token):
+        user.is_active = True
+        user.save()
+        login(request, user)
+        messages.success(request, "Successfully Logged In")
+        return redirect(reverse_lazy('index'))
+        # return HttpResponse('Thank you for your email confirmation. Now you can login your account.')
+    else:
+        return HttpResponse('Activation link is invalid or your account is already Verified! Try To Login')
+
 
 
 class LoginViewUser(LoginView):
     template_name = "login.html"
-    success_url = reverse_lazy('core:index')
+    success_url = reverse_lazy('index')
 
 
-# class RegisterViewSeller(LoginRequiredMixin,CreateView):
-#     template_name = 'registerseller2.html'
-#     form_class = RegistrationFormSeller2
-#     success_url = reverse_lazy('core:index')
 
-#     def form_valid(self, form):
-#         user = self.request.user
-#         user.type.append(user.Types.SELLER)
-#         user.save()
-#         form.instance.user = self.request.user
-#         return super().form_valid(form)
 
 
 class LogoutViewUser(LogoutView):
-    success_url = reverse_lazy('core:index')
+    # Override the success_url attribute
+    success_url = reverse_lazy('index')
+
+
+# def custom_password_reset_confirm(request, uidb64, token):
+#     User = get_user_model()
+
+#     try:
+#         uid = int(uidb64)
+#         user = User.objects.get(pk=uid)
+#         print(user)
+#     except (ValueError, User.DoesNotExist):
+#         user = None
+
+#     if user is not None and default_token_generator.check_token(user, token):
+#         if request.method == 'POST':
+#             form = SetPasswordForm(user, request.POST)
+#             if form.is_valid():
+#                 form.save()
+#                 update_session_auth_hash(request, form.user)  # Keep the user logged in
+#                 messages.success(request, "Your password has been reset successfully.")
+#                 return redirect('password_reset_complete')
+#         else:
+#             form = SetPasswordForm(user)
+
+#         return render(request, 'registration/password_reset_form.html', {'form': form})
+#     else:
+#         messages.error(request, "Invalid password reset link.")
+#         return redirect('password_reset_done')
+    
+    
+def example_view(request):
+    context = {
+        'user_name': 'John',  # Replace this with the actual user's name
+    }
+    return render(request, 'example_template.html', context)
