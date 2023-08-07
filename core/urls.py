@@ -2,6 +2,9 @@ from django.contrib.auth import views as auth_views
 from django.urls import reverse_lazy
 from django.contrib import admin
 from django.urls import path
+from django.conf import settings
+from django.conf.urls.static import static
+
 from . import views
 
 
@@ -22,14 +25,18 @@ urlpatterns = [
     path('activate/<uidb64>/<token>', views.activate, name='activate'),
     path('example', views.example_view, name="example"),
     path('testsession',views.testsession, name="testsession"),
-
-
-
-
-
-
-
-
+    
+    #Products
+    
+    path('listproducts/', views.ProductListView.as_view(), name="listproducts"),
+    path('productdeatil/<int:pk>', views.ProductDetailView.as_view(), name="productdeatil"),
+    path('addtocart/<int:id>/', views.addToCart, name="addtocart"),
+    path('displaycart/', views.DisplayCart.as_view(), name="displaycart"),
+    path('updatecart/<int:pk>/', views.UpdateCart.as_view(), name="updatecart"),
+    path('deletefromcart/<int:pk>/', views.DeleteFromCart.as_view(), name="deletefromcart"),
+    
+    
+    
 
 
 
@@ -58,3 +65,6 @@ urlpatterns = [
 
 
 ]
+if settings.DEBUG:
+    urlpatterns += static(settings.STATIC_URL,document_root=settings.STATIC_ROOT)
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

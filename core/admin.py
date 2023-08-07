@@ -2,8 +2,10 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import User
 from .forms import CustomUserCreationForm, CustomUserChangeForm
-from .models import CustomUser,Contact,SellerAdditional,Seller,CustomerAdditional,CustomerManager,Customer
+from .models import CustomUser,Contact,SellerAdditional,Seller,CustomerAdditional,CustomerManager,Customer,Product,Cart,ProductInCart
 # Register your models here.
+
+
 
 
 
@@ -45,6 +47,40 @@ admin.site.register(Seller, SellerAdmin)
 admin.site.register(Customer)
 admin.site.register(SellerAdditional)
 admin.site.register(CustomerAdditional)
+admin.site.register(Product)
+
+
+class ProductInCartInline(admin.TabularInline):
+    model = ProductInCart
+
+class CartInline(admin.TabularInline):
+    model = Cart    #onetoonefield foreignkey
+
+@admin.register(Cart) # through register decorator
+class CartAdmin(admin.ModelAdmin):
+    model = Cart
+    list_display = ('user','staff', 'created_on',)    # here user__is_staff will not work   
+    list_filter = ('user', 'created_on',)
+    #fields = ('staff',)           # either fields or fieldset
+    fieldsets = (
+        (None, {'fields': ('user', 'created_on',)}),   # only direct relationship no nested relationship('__') ex. user__is_staff
+        #('User', {'fields': ('staff',)}),
+    )
+    inlines = (
+        ProductInCartInline,
+    )
+    # To display only in list_display
+    def staff(self,obj):
+        return obj.user.is_staff
+    # staff.empty_value_display = '???'
+    staff.admin_order_field  = 'user__is_staff'  #Allows column order sorting
+    staff.short_description = 'Staff User'  #Renames column head
+
+    #Filtering on side - for some reason, this works
+    list_filter = ['user__is_staff', 'created_on',]    # with direct foreign key(user) no error but not shown in filters, with function error
+    # ordering = ['user',]
+    search_fields = ['user__username']     # with direct foreign key no error but filtering not possible directly
+
 
 
 

@@ -9,7 +9,8 @@ https://docs.djangoproject.com/en/3.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
-
+import os
+from django.contrib.messages import constants as messages
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -25,7 +26,8 @@ SECRET_KEY = 'django-insecure-kwnp3#o%oqy-5@ix*77l=vzcvzubk=vheym+jrpj&uzn!55!x=
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['www.wondershop.in', 'services.wondershop.in', '127.0.0.1', 'admin.wondershop.in']
+ALLOWED_HOSTS = ['www.wondershop.in',
+                 'services.wondershop.in', '127.0.0.1', 'admin.wondershop.in']
 
 
 # Application definition
@@ -37,12 +39,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    
-    
+
+
     'core',
     'seller',
     'django_hosts',
-    
+
 ]
 
 CACHES = {
@@ -52,17 +54,14 @@ CACHES = {
     }
 }
 
-#SESSION_ENGINE = "django.contrib.sessions.backends.db"
+# SESSION_ENGINE = "django.contrib.sessions.backends.db"
 
 SESSION_ENGINE = "django.contrib.sessions.backends.cache"
-#SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
-#SESSION_ENGINE = "django.contrib.sessions.backends.file"
-#SESSION_FILE_PATH = r"/home/dil_shad/Documents/practical/Ecommerceprojct"
-#SESSION_ENGINE = "django.contrib.sessions.backends.cached_db"
-#SESSION_CACHE_ALIAS
-
-
-
+# SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
+# SESSION_ENGINE = "django.contrib.sessions.backends.file"
+# SESSION_FILE_PATH = r"/home/dil_shad/Documents/practical/Ecommerceprojct"
+# SESSION_ENGINE = "django.contrib.sessions.backends.cached_db"
+# SESSION_CACHE_ALIAS
 
 
 MIDDLEWARE = [
@@ -76,12 +75,6 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django_hosts.middleware.HostsResponseMiddleware'
 ]
-
-
-
-
-
-
 
 
 ROOT_URLCONF = 'Ecommerceprojct.urls'
@@ -158,6 +151,15 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
 STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'static_cdn')
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+STATICFILES_DIRS = [
+    # mention folders in saticfiles_dirs where django has to look for static 
+    # files except static folder inside apps during development
+    os.path.join(BASE_DIR, "static"),
+]
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
@@ -173,20 +175,20 @@ LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
 
 
-from django.contrib.messages import constants as messages
 MESSAGE_TAGS = {
-    messages.ERROR : 'danger'   # here we can override tags meaning in place of there actual color replace by another
+    # here we can override tags meaning in place of there actual color replace by another
+    messages.ERROR: 'danger'
 }
 
 
-#SMTP SETTINGS
+# SMTP SETTINGS
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
-EMAIL_HOST_USER = 'dlz611606@gmail.com'  
-EMAIL_HOST_PASSWORD = 'exhfxrthbxtnrybj'        #App Password
+EMAIL_HOST_USER = 'dlz611606@gmail.com'
+EMAIL_HOST_PASSWORD = 'exhfxrthbxtnrybj'  # App Password
 EMAIL_USE_TLS = True  # or False if not using TLS/SSL
 DEFAULT_FROM_EMAIL = 'Wonder<dlz611606@gmail.com>'
 
 
-#PASSWORD_RESET_TIMEOUT_DAYS = "7"
+# PASSWORD_RESET_TIMEOUT_DAYS = "7"

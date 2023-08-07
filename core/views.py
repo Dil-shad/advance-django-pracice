@@ -1,12 +1,13 @@
 from django.shortcuts import render
-from django.views.generic import TemplateView, FormView, CreateView
+from django.views.generic import TemplateView, FormView, CreateView,ListView,DeleteView,UpdateView,DeleteView,DetailView
 from django.contrib.auth.views import LoginView, LogoutView
 from django.core.exceptions import ValidationError
-from .forms import ContactUsForm, RegistrationForm, RegistrationFormSeller, RegistrationFormSeller2
+from .forms import ContactUsForm, RegistrationForm, RegistrationFormSeller, RegistrationFormSeller2,CartForm
 from django.shortcuts import render, HttpResponse, redirect
 from django.urls import reverse_lazy
-from .models import CustomUser, SellerAdditional
+from .models import CustomUser, SellerAdditional, Product
 from django.contrib.auth.mixins import LoginRequiredMixin
+from .models import *
 # Create your views here.
 
 from django.core.mail import EmailMessage, send_mail
@@ -28,6 +29,7 @@ from django.contrib.auth import get_user_model, update_session_auth_hash
 from django.contrib.auth.forms import SetPasswordForm
 from django.contrib import messages
 
+from django.contrib.auth.decorators import login_required
 
 # def index(request):
 #     return render(request, 'index.html')
@@ -43,9 +45,11 @@ class Index(TemplateView):
         print(context_old)
         context = {'age': age}
         return context
+
     def get(self, request):
         request.session['test'] = 'testing'
         return super().get(request)
+
 
 def Contactus(request):
     if request.method == 'POST':
@@ -225,7 +229,7 @@ def testsession(request):
     if request.session.get('test', False):
         print(request.session['test'])
 
-    request.session.set_expiry(60)
+    request.session.set_expiry(1)
     request.session['test'] = 'testing'
     request.session['test2'] = 'testing2'
     return render(request, 'sessiontesting.html')
@@ -236,3 +240,81 @@ def example_view(request):
         'user_name': 'John',  # Replace this with the actual user's name
     }
     return render(request, 'example_template.html', context)
+# ----------------------------------------------------------------#
+
+
+class ProductListView(ListView):
+    model = Product
+    template_name = "listproducts.html"
+    context_object_name='product'
+    
+    
+    
+class ProductDetailView(DetailView):
+    model = Product
+    context_object_name = 'product'
+    template_name = "productdetail.html"
+
+
+
+@login_required
+def addToCart(request, id):
+    try:
+        cart = Cart.objects.get(user = request.user)
+        try:
+            product = Product.objects.get(product_id = id)
+            try:
+                productincart = ProductInCart.objects.get(cart = cart, product = product)
+                productincart.quantity = productincart.quantity + 1
+                productincart.save()
+                messages.success(request, "Successfully added to cart")
+                return redirect(reverse_lazy("displaycart"))
+            except:
+                productincart = ProductInCart.objects.create(cart = cart, product = product, quantity=1)
+                messages.success(request, "Successfully added to cart")
+                return redirect(reverse_lazy("displaycart"))
+        except:
+            messages.error(request, "Product can not be found")
+            return redirect(reverse_lazy('listproducts'))
+    except:
+        cart = Cart.objects.create(user = request.user)
+        try:
+            product = Product.objects.get(product_id = id)
+            productincart = ProductInCart.objects.create(cart = cart, product = product, quantity = 1)
+            messages.success(request, "Successfully added to cart")
+            return redirect(reverse_lazy("displaycart"))
+        except:
+            messages.error(request, "Error in adding to cart. Please try again")
+            return redirect(reverse_lazy('listproducts'))
+        
+        
+class DisplayCart(LoginRequiredMixin, ListView):
+    model = ProductInCart
+    template_name = "displaycart.html"
+    context_object_name = "cart"
+
+    def get_queryset(self):
+        queryset = ProductInCart.objects.filter(cart = self.request.user.cart)
+        return queryset
+    
+    
+class UpdateCart(LoginRequiredMixin, UpdateView):
+    model = ProductInCart
+    form_class = CartForm
+    success_url = reverse_lazy("displaycart")
+
+    def post(self, request, *args, **kwargs):
+        response = super().post(request, *args, **kwargs)
+        if response.status_code == 302:
+            if int(request.POST.get("quantity")) == 0:
+                productincart = self.get_object()
+                productincart.delete()+
+        else:
+            messages.error(request, "error in quantity")
+            return redirect(reverse_lazy("displaycart"))
+
+
+
+class DeleteFromCart(LoginRequiredMixin, DeleteView):
+    model = ProductInCart
+    success_url = reverse_lazy("displaycart")  
