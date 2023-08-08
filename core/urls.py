@@ -42,6 +42,8 @@ urlpatterns = [
     # Payment APIs
     path('payment/', views.payment, name = 'payment'),
     path('handlerequest/', views.handlerequest, name = 'handlerequest'),
+     # Generating Invoice
+    path('generateinvoice/<int:pk>/', views.GenerateInvoice.as_view(), name = 'generateinvoice'),
     
 
 

@@ -4,7 +4,7 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import User
 from .forms import CustomUserCreationForm, CustomUserChangeForm
-from .models import CustomUser, Contact, SellerAdditional, Seller, CustomerAdditional, CustomerManager, Customer, Product, Cart, ProductInCart,Order, Order
+from .models import CustomUser, Contact, SellerAdditional, Seller, CustomerAdditional, CustomerManager, Customer, Product, Cart, ProductInCart,Order, Order,ProductInOrder
 
 # Register your models here.
 
@@ -40,6 +40,10 @@ class SellerAdmin(admin.ModelAdmin):
     inlines = (
         SellerAdditionalInline,
     )
+class ProductInOrderInline(admin.TabularInline):
+    model = ProductInOrder
+    
+
 
 
 admin.site.register(CustomUser, CustomUserAdmin)
@@ -49,7 +53,14 @@ admin.site.register(Customer)
 admin.site.register(SellerAdditional)
 admin.site.register(CustomerAdditional)
 admin.site.register(Product)
-admin.site.register(Order)
+
+@admin.register(Order)
+class OrderAdmin(admin.ModelAdmin):
+    inlines = (
+        ProductInOrderInline,
+    )
+    
+
 
 
 class ProductInCartInline(admin.TabularInline):
