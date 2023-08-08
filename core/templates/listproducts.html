@@ -96,33 +96,35 @@
     <br>
 
     <!-- **Now the pagination section** .... -->
-    {% if is_paginated %}
-    <nav class="pagination">
-      <ul class="pagination">
-        {% if page_obj.has_previous %}
-        <li class="page-item">
-          <a class="page-link" tabindex="-1" aria-disabled="true"
-            href="/listproducts/?page={{ page_obj.previous_page_number }}">Previous</a>
-        </li>
-        {% endif %}
-        {% for i in paginator.page_range %}
-        {% if i == page_obj.number%}
-        <li class="page-item active" aria-current="page">
-          <a class="page-link" href="/listproducts/?page={{i}}" span class="visually-hidden">{{i}}</span></a>
-        </li>
-        {% else %}
-        <li class="page-item"><a class="page-link" href="/listproducts/?page={{i}}">{{i}}</a></li>
-        {% endif %}
-        {% endfor %}
-        {% if page_obj.has_next %}
-        <li class="page-item">
-          <a class="page-link" tabindex="-1" href="/listproducts/?page={{ page_obj.next_page_number }}">Next</a>
-        </li>
-        {% endif %}
-      </ul>
-    </nav>
+{% if is_paginated %}
+<nav class="pagination">
+  <ul class="pagination">
+    {% if page_obj.has_previous %}
+    <li class="page-item">
+      <a class="page-link" tabindex="-1" href="#" onclick="navigateToPage({{ page_obj.previous_page_number }})">Previous</a>
+    </li>
     {% endif %}
-  </div>
+    {% for i in paginator.page_range %}
+    {% if i == page_obj.number %}
+    <li class="page-item active" aria-current="page">
+      <a class="page-link" href="/listproducts/?page={{ i }}" span class="visually-hidden">{{ i }}</span></a>
+    </li>
+    {% else %}
+    <li class="page-item">
+      <a class="page-link" href="#" onclick="navigateToPage({{ i }})">{{ i }}</a>
+    </li>
+    {% endif %}
+    {% endfor %}
+    {% if page_obj.has_next %}
+    <li class="page-item">
+      <a class="page-link" tabindex="-1" href="#" onclick="navigateToPage({{ page_obj.next_page_number }})">Next</a>
+    </li>
+    {% endif %}
+  </ul>
+</nav>
+{% endif %}
+</div>
+
  
 
 
@@ -183,6 +185,19 @@ function finalurl3() {
 
 }
 
+function finalurl6(page_obj){
+  var url = new URL(window.location.href);
+  var search_params = url.searchParams;
+  search_params.set('page',page_obj);
+  url.search=search_params.toString();
+  var new_url = url.toString();
+  return new_url
+}
+
+function navigateToPage(pageNumber) {
+  var newUrl = finalurl6(pageNumber);
+  window.location.href = newUrl;
+}
 
 </script>
 

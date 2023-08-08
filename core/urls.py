@@ -27,7 +27,6 @@ urlpatterns = [
     path('testsession',views.testsession, name="testsession"),
     
     #Products
-    
     #path('listproducts/', views.ProductListView.as_view(), name="listproducts"),
     path('listproducts/', views.listProducts, name="listproducts"),
     path('productdeatil/<int:pk>', views.ProductDetailView.as_view(), name="productdeatil"),
@@ -40,11 +39,10 @@ urlpatterns = [
     path('suggestionapi/', views.suggestionApi, name="suggestionapi"),
 
     
+    # Payment APIs
+    path('payment/', views.payment, name = 'payment'),
+    path('handlerequest/', views.handlerequest, name = 'handlerequest'),
     
-    
-
-
-
 
 
 

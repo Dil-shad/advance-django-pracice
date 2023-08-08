@@ -192,3 +192,10 @@ DEFAULT_FROM_EMAIL = 'Wonder<dlz611606@gmail.com>'
 
 
 # PASSWORD_RESET_TIMEOUT_DAYS = "7"
+
+# PAYMENT GATEWAY SETTINGS
+
+
+razorpay_id = "rzp_test_WrDDkBISnVHMGb"
+razorpay_account_id = "SqMCyMW52Kx2K4mtzOBOLdHd"
+

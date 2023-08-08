@@ -1,14 +1,16 @@
+from django.views.decorators.csrf import csrf_exempt
+from .models import Order, ProductInOrder, Cart
 from django.shortcuts import render
-from django.views.generic import TemplateView, FormView, CreateView,ListView,DeleteView,UpdateView,DeleteView,DetailView
+from django.views.generic import TemplateView, FormView, CreateView, ListView, DeleteView, UpdateView, DeleteView, DetailView
 from django.contrib.auth.views import LoginView, LogoutView
 from django.core.exceptions import ValidationError
-from .forms import ContactUsForm, RegistrationForm, RegistrationFormSeller, RegistrationFormSeller2,CartForm
+from .forms import ContactUsForm, RegistrationForm, RegistrationFormSeller, RegistrationFormSeller2, CartForm
 from django.shortcuts import render, HttpResponse, redirect
 from django.urls import reverse_lazy
 from .models import CustomUser, SellerAdditional, Product
 from django.contrib.auth.mixins import LoginRequiredMixin
 from .models import *
-# Create your views here.
+
 
 from django.core.mail import EmailMessage, send_mail
 from .tokens import account_activation_token
@@ -34,8 +36,12 @@ from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 import json
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db.models import Q
-from django.http import JsonResponse,HttpResponse
+from django.http import JsonResponse, HttpResponse
 
+# Adding Payment Gateway
+import razorpay
+razorpay_client = razorpay.Client(
+    auth=(settings.razorpay_id, settings.razorpay_account_id))
 
 # def index(request):
 #     return render(request, 'index.html')
@@ -243,7 +249,7 @@ def testsession(request):
 
 def example_view(request):
     context = {
-        'user_name': 'John',  
+        'user_name': 'John',
     }
     return render(request, 'example_template.html', context)
 # ----------------------------------------------------------------#
@@ -252,10 +258,8 @@ def example_view(request):
 class ProductListView(ListView):
     model = Product
     template_name = "listproducts.html"
-    context_object_name='product'
+    context_object_name = 'product'
     paginate_by = 2
-    
-
 
 
 def listProducts(request):
@@ -267,7 +271,8 @@ def listProducts(request):
         product_per_page = 4
 
     if search:
-        product = Product.objects.filter(Q(product_name__icontains=search) | Q(brand__icontains=search))
+        product = Product.objects.filter(
+            Q(product_name__icontains=search) | Q(brand__icontains=search))
     else:
         product = Product.objects.all()
 
@@ -302,79 +307,81 @@ def suggestionApi(request):
         # print(list(qs.values()))
         # print(json.dumps(list(qs.values()), cls = DjangoJSONEncoder))
         titles = [product.product_name for product in qs]
-        #print(titles)
-        if len(qs)<10:
+        # print(titles)
+        if len(qs) < 10:
             remaining_count = 10 - len(qs)
-            qs2 = Product.objects.filter(Q(brand__icontains=search))[0:remaining_count]
+            qs2 = Product.objects.filter(Q(brand__icontains=search))[
+                0:remaining_count]
             titles.extend(product.brand for product in qs2)
-        return JsonResponse(titles, safe=False)      # [1,2,3,4] ---> "[1,2,3,4]"   queryset ---> serialize into list or dict format ---> json format using json.dumps with a DjangoJSONEncoder(encoder to handle datetime like objects)
-
+        # [1,2,3,4] ---> "[1,2,3,4]"   queryset ---> serialize into list or dict format ---> json format using json.dumps with a DjangoJSONEncoder(encoder to handle datetime like objects)
+        return JsonResponse(titles, safe=False)
 
 
 def listProductsApi(request):
     # print(Product.objects.all())
     # print(Product.objects.values())
-    #result = json.dumps(list(Product.objects.values()), sort_keys=False, indent=0, cls=DjangoJSONEncoder)   # will return error if you have a datetime object as it is not jsonserializable  so thats why use DjangoJSONEncoder, indent to beautify and sort_keys to sort keys
-    #print(type(result))    #str type  
-    #print(result)
-    result = list(Product.objects.values())          # will work like passing queryset as a context data if used by a template
-    #print(result)
-    #return render(request, "firstapp/listproducts.html", {"product":result})
-    return JsonResponse(result, safe=False) 
-    
-    
-    
-    
-    
+    # result = json.dumps(list(Product.objects.values()), sort_keys=False, indent=0, cls=DjangoJSONEncoder)   # will return error if you have a datetime object as it is not jsonserializable  so thats why use DjangoJSONEncoder, indent to beautify and sort_keys to sort keys
+    # print(type(result))    #str type
+    # print(result)
+    # will work like passing queryset as a context data if used by a template
+    result = list(Product.objects.values())
+    # print(result)
+    # return render(request, "listproducts.html", {"product":result})
+    return JsonResponse(result, safe=False)
+
+
 class ProductDetailView(DetailView):
     model = Product
     context_object_name = 'product'
     template_name = "productdetail.html"
 
 
-
 @login_required
 def addToCart(request, id):
     try:
-        cart = Cart.objects.get(user = request.user)
+        cart = Cart.objects.get(user=request.user)
         try:
-            product = Product.objects.get(product_id = id)
+            product = Product.objects.get(product_id=id)
             try:
-                productincart = ProductInCart.objects.get(cart = cart, product = product)
+                productincart = ProductInCart.objects.get(
+                    cart=cart, product=product)
                 productincart.quantity = productincart.quantity + 1
                 productincart.save()
                 messages.success(request, "Successfully added to cart")
                 return redirect(reverse_lazy("displaycart"))
             except:
-                productincart = ProductInCart.objects.create(cart = cart, product = product, quantity=1)
+                productincart = ProductInCart.objects.create(
+                    cart=cart, product=product, quantity=1)
                 messages.success(request, "Successfully added to cart")
                 return redirect(reverse_lazy("displaycart"))
         except:
             messages.error(request, "Product can not be found")
             return redirect(reverse_lazy('listproducts'))
     except:
-        
-        cart = Cart.objects.create(user = request.user)
+
+        cart = Cart.objects.create(user=request.user)
         try:
-            product = Product.objects.get(product_id = id)
-            productincart = ProductInCart.objects.create(cart = cart, product = product, quantity = 1)
+            product = Product.objects.get(product_id=id)
+            productincart = ProductInCart.objects.create(
+                cart=cart, product=product, quantity=1)
             messages.success(request, "Successfully added to cart")
             return redirect(reverse_lazy("displaycart"))
         except:
-            messages.error(request, "Error in adding to cart. Please try again")
+            messages.error(
+                request, "Error in adding to cart. Please try again")
             return redirect(reverse_lazy('listproducts'))
-        
-        
+
+
 class DisplayCart(LoginRequiredMixin, ListView):
     model = ProductInCart
     template_name = "displaycart.html"
     context_object_name = "cart"
 
     def get_queryset(self):
-        queryset = ProductInCart.objects.filter(cart = self.request.user.cart)
+        queryset = ProductInCart.objects.filter(cart=self.request.user.cart)
         return queryset
-    
-    
+
+
 class UpdateCart(LoginRequiredMixin, UpdateView):
     model = ProductInCart
     form_class = CartForm
@@ -391,7 +398,95 @@ class UpdateCart(LoginRequiredMixin, UpdateView):
             messages.error(request, "error in quantity")
             return redirect(reverse_lazy("displaycart"))
 
+
 class DeleteFromCart(LoginRequiredMixin, DeleteView):
     model = ProductInCart
-    success_url = reverse_lazy("displaycart")  
- 
+    success_url = reverse_lazy("displaycart")
+
+ # payments
+
+
+@login_required
+def payment(request):
+    if request.method == "POST":
+        try:
+            cart = Cart.objects.get(user=request.user)
+            products_in_cart = ProductInCart.objects.filter(cart=cart)
+            final_price = 0
+            if (len(products_in_cart) > 0):
+                order = Order.objects.create(user=request.user, total_amount=0)
+                # order.save()
+                for product in products_in_cart:
+                    product_in_order = ProductInOrder.objects.create(
+                        order=order, product=product.product, quantity=product.quantity, price=product.product.price)
+                    final_price = final_price + \
+                        (product.product.price * product.quantity)
+            else:
+                return HttpResponse("No product in cart")
+        except:
+            return HttpResponse("No product in cart")
+
+        order.total_amount = final_price
+        order.save()
+
+        order_currency = 'INR'
+
+        callback_url = 'http://' + \
+            str(get_current_site(request))+"/handlerequest/"
+        #print(callback_url)
+        notes = {'order-type': "basic order from the website", 'key': 'value'}
+        razorpay_order = razorpay_client.order.create(dict(
+            amount=final_price*100, currency=order_currency, notes=notes, receipt=order.order_id, payment_capture='0'))
+        #print(razorpay_order['id'])
+        order.razorpay_order_id = razorpay_order['id']
+        order.save()
+        context = {'order': order, 'order_id': razorpay_order['id'], 'orderId': order.order_id,
+                   'final_price': final_price, 'razorpay_merchant_id': settings.razorpay_id, 'callback_url': callback_url}
+        return render(request, 'payment/paymentsummaryrazorpay.html', context)
+    else:
+        return HttpResponse("505 Not Found")
+
+
+@csrf_exempt
+def handlerequest(request):
+    if request.method == "POST":
+        try:
+            payment_id = request.POST.get('razorpay_payment_id', '')
+            order_id = request.POST.get('razorpay_order_id', '')
+            signature = request.POST.get('razorpay_signature', '')
+            params_dict = {
+                'razorpay_order_id': order_id,
+                'razorpay_payment_id': payment_id,
+                'razorpay_signature': signature
+            }
+            try:
+                order_db = Order.objects.get(razorpay_order_id=order_id)
+            except:
+                return HttpResponse("505 Not Found")
+            order_db.razorpay_payment_id = payment_id
+            order_db.razorpay_signature = signature
+            order_db.save()
+            result = razorpay_client.utility.verify_payment_signature(params_dict)
+            print(result)
+            if result==True:
+                amount = order_db.total_amount * 100  # we have to pass in paisa
+                try:
+                    razorpay_client.payment.capture(payment_id, amount)
+                    order_db.payment_status = 1
+                    order_db.save()
+                    return render(request, 'payment/paymentsuccess.html')
+                except:
+                    order_db.payment_status = 2
+                    order_db.save()
+                    return render(request, 'payment/paymentfailed.html')
+            else:
+                order_db.payment_status = 2
+                order_db.save()
+                return render(request, 'payment/paymentfailed.html')
+        except:
+            return HttpResponse("505 not found")
+
+
+
+
+
