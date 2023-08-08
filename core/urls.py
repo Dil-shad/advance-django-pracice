@@ -28,12 +28,17 @@ urlpatterns = [
     
     #Products
     
-    path('listproducts/', views.ProductListView.as_view(), name="listproducts"),
+    #path('listproducts/', views.ProductListView.as_view(), name="listproducts"),
+    path('listproducts/', views.listProducts, name="listproducts"),
     path('productdeatil/<int:pk>', views.ProductDetailView.as_view(), name="productdeatil"),
     path('addtocart/<int:id>/', views.addToCart, name="addtocart"),
     path('displaycart/', views.DisplayCart.as_view(), name="displaycart"),
     path('updatecart/<int:pk>/', views.UpdateCart.as_view(), name="updatecart"),
     path('deletefromcart/<int:pk>/', views.DeleteFromCart.as_view(), name="deletefromcart"),
+    
+    #search autocomplete
+    path('suggestionapi/', views.suggestionApi, name="suggestionapi"),
+
     
     
     

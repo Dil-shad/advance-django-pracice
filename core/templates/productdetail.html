@@ -51,7 +51,7 @@
         <div class="col-md-7">
             <h2 class="featurette-heading">{{product.product_name}}</h2>
             <p class="lead">Rs. {{product.price}}</p>
-            <a class="btn btn-primary" href="#">Add To Cart</a>
+            <a class="btn btn-primary" href="{% url 'addtocart' id=product.product_id %}">Add To Cart</a>
         </div>
 
     </div>

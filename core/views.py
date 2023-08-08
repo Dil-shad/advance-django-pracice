@@ -30,6 +30,12 @@ from django.contrib.auth.forms import SetPasswordForm
 from django.contrib import messages
 
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
+import json
+from django.core.serializers.json import DjangoJSONEncoder
+from django.db.models import Q
+from django.http import JsonResponse,HttpResponse
+
 
 # def index(request):
 #     return render(request, 'index.html')
@@ -237,7 +243,7 @@ def testsession(request):
 
 def example_view(request):
     context = {
-        'user_name': 'John',  # Replace this with the actual user's name
+        'user_name': 'John',  
     }
     return render(request, 'example_template.html', context)
 # ----------------------------------------------------------------#
@@ -247,6 +253,76 @@ class ProductListView(ListView):
     model = Product
     template_name = "listproducts.html"
     context_object_name='product'
+    paginate_by = 2
+    
+
+
+
+def listProducts(request):
+    ordering = request.GET.get('ordering', "")
+    search = request.GET.get('search', "")
+    price = request.GET.get('price', "")
+    product_per_page = request.GET.get('itemsPer')
+    if not product_per_page:
+        product_per_page = 4
+
+    if search:
+        product = Product.objects.filter(Q(product_name__icontains=search) | Q(brand__icontains=search))
+    else:
+        product = Product.objects.all()
+
+    if ordering:
+        product = product.order_by(ordering)
+
+    if price:
+        product = product.filter(price__lte=price)
+
+    # Pagination
+    page = request.GET.get('page', 1)
+    paginator = Paginator(product, product_per_page)
+    try:
+        product_subset = paginator.page(page)
+    except EmptyPage:
+        product_subset = paginator.page(paginator.num_pages)
+
+    context = {
+        "product": product_subset,
+        'page_obj': product_subset,
+        'is_paginated': product_subset.has_other_pages(),
+        'paginator': paginator
+    }
+
+    return render(request, "listproducts.html", context)
+
+
+def suggestionApi(request):
+    if 'term' in request.GET:
+        search = request.GET.get('term')
+        qs = Product.objects.filter(Q(product_name__icontains=search))[0:10]
+        # print(list(qs.values()))
+        # print(json.dumps(list(qs.values()), cls = DjangoJSONEncoder))
+        titles = [product.product_name for product in qs]
+        #print(titles)
+        if len(qs)<10:
+            remaining_count = 10 - len(qs)
+            qs2 = Product.objects.filter(Q(brand__icontains=search))[0:remaining_count]
+            titles.extend(product.brand for product in qs2)
+        return JsonResponse(titles, safe=False)      # [1,2,3,4] ---> "[1,2,3,4]"   queryset ---> serialize into list or dict format ---> json format using json.dumps with a DjangoJSONEncoder(encoder to handle datetime like objects)
+
+
+
+def listProductsApi(request):
+    # print(Product.objects.all())
+    # print(Product.objects.values())
+    #result = json.dumps(list(Product.objects.values()), sort_keys=False, indent=0, cls=DjangoJSONEncoder)   # will return error if you have a datetime object as it is not jsonserializable  so thats why use DjangoJSONEncoder, indent to beautify and sort_keys to sort keys
+    #print(type(result))    #str type  
+    #print(result)
+    result = list(Product.objects.values())          # will work like passing queryset as a context data if used by a template
+    #print(result)
+    #return render(request, "firstapp/listproducts.html", {"product":result})
+    return JsonResponse(result, safe=False) 
+    
+    
     
     
     
@@ -277,6 +353,7 @@ def addToCart(request, id):
             messages.error(request, "Product can not be found")
             return redirect(reverse_lazy('listproducts'))
     except:
+        
         cart = Cart.objects.create(user = request.user)
         try:
             product = Product.objects.get(product_id = id)
@@ -308,13 +385,13 @@ class UpdateCart(LoginRequiredMixin, UpdateView):
         if response.status_code == 302:
             if int(request.POST.get("quantity")) == 0:
                 productincart = self.get_object()
-                productincart.delete()+
+                productincart.delete()
+            return response
         else:
             messages.error(request, "error in quantity")
             return redirect(reverse_lazy("displaycart"))
 
-
-
 class DeleteFromCart(LoginRequiredMixin, DeleteView):
     model = ProductInCart
     success_url = reverse_lazy("displaycart")  
+ 

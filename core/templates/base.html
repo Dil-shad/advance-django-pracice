@@ -37,7 +37,7 @@
               <a class="nav-link " href="{% host_url 'contactus' host 'www' %}" tabindex="-1" aria-disabled="true">Contactus</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="#">Link</a>
+              <a class="nav-link" href="{% host_url 'listproducts' host 'www'  %}">products</a>
             </li>
             <li class="nav-item dropdown">
               <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -52,10 +52,10 @@
             </li>
            
           </ul>
-           <form class="d-flex mx-3">
+           {% comment %} <form class="d-flex mx-3">
             <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
             <button class="btn btn-outline-success" type="submit">Search</button>
-          </form> 
+          </form>  {% endcomment %}
           <div class="dropdown">
             <button type="button" class="btn btn-dark dropdown-toggle" data-bs-toggle="dropdown">
               Account

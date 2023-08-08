@@ -152,7 +152,13 @@ class Product(models.Model):
     product_name = models.CharField(max_length=15)
     image = models.ImageField(upload_to = "core/productimages", default = None, null = True, blank = True)
     price = models.FloatField()
+    brand=models.CharField(max_length=100)
+    date_added=models.DateTimeField(default=timezone.now)
 
+    
+    # class Meta:
+    #     ordering = ['-price']
+        
     @classmethod
     def updateprice(cls,product_id, price):
         product = cls.objects.filter(product_id = product_id)
