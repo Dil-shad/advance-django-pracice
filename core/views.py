@@ -576,3 +576,98 @@ class GenerateInvoice(View):
             return response
         return HttpResponse("Not found")
   
+  
+  
+  
+  
+  
+  
+# Relating To Group
+
+# to make a new group you can do that like any other models by creating a new record in it
+
+# associating a user to a group
+from django.contrib.auth.models import Group
+@login_required
+def addToPremiumGroup(request):
+    group = Group.objects.get(name="premium")
+    request.user.groups.add(group)
+    return HttpResponse("successfully added")
+
+
+# checking group not permission 
+# in function based view inside the view or "custom decorator"
+from .models import PremiumProduct
+# from .decorators import group_required
+# @group_required('premium')
+# def premiumProducts(request):       
+#     #if request.user.groups.filter(name = "premium").exists():
+#         product = PremiumProduct.objects.all()
+#         return render(request, "listpremiumproducts.html", {"product":product})
+
+    # else:
+    #     return HttpResponse("Only for premium members")
+
+# in class based view inside the view or a "custom mixin"
+# from .mixins import CheckPremiumGroupMixin
+# class PremiumProducts(CheckPremiumGroupMixin, ListView):
+#     template_name = "listpremiumproducts.html"
+#     model = PremiumProduct
+#     context_object_name = "product"
+#     #paginate_by = 2
+
+
+
+# Relating To Permission
+# checking permission and that permission can belong to that user or to the group that user is associated
+#from django.contrib.auth.decorators import permission_required
+# @permission_required('core.view_premiumproduct')
+# def premiumProducts(request):
+#     # ct = ContentType.objects.get_for_model(PremiumProduct)     
+#     # if request.user.permissions.filter(codename = "view_premiumproducts" , contentype = ct).exists():
+    
+#     #if request.user.has_perm('core.view_premiumproduct'):
+#         product = PremiumProduct.objects.all()
+#         return render(request, "listpremiumproducts.html", {"product":product})
+    # else:
+    #     return HttpResponse("Not allowed") 
+
+
+from django.contrib.auth.mixins import PermissionRequiredMixin
+class PremiumProducts(PermissionRequiredMixin, ListView):
+    template_name = "listpremiumproducts.html"
+    model = PremiumProduct
+    context_object_name = "product"
+    paginate_by = 2
+    permission_required = "core.view_premiumproduct"  # if using PermissionRequiredMixin
+
+
+# FOR creating permissions
+
+#1 Creating Custom Model Depenedent Permission through Code 
+#from django.contrib.auth.models import Group, ContentType, Permission
+# ct = ContentType.objects.get_for_model(PremiumProduct)
+# permission = Permission.objects.create(codename="can_do_this", contentype = ct)
+
+
+#2 Creating Custom Model Dependent Permission by adding in Meta of that model
+
+#3 Creating Custom Model Independent Permission by creating a separate model for permissions
+
+# filtering existing permissions
+# ct = ContentType.obejcts.get_for_model(PremiumProduct) 
+# permission = Permission.objects.get(codename='view_premiumproduct', content_type=ct)
+
+
+# Adding permission to user
+# user.permissions.add(permission)
+
+# Adding permission to group
+# new_group, created = Group.objects.get_or_create(name="new_group")
+# new_group.permissions.add(permission)
+
+
+
+
+
+

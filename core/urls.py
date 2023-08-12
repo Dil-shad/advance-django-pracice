@@ -35,6 +35,10 @@ urlpatterns = [
     path('updatecart/<int:pk>/', views.UpdateCart.as_view(), name="updatecart"),
     path('deletefromcart/<int:pk>/', views.DeleteFromCart.as_view(), name="deletefromcart"),
     
+    path('addtopremium/', views.addToPremiumGroup, name="addtopremium"),
+    #path('premiumproducts/', views.premiumProducts, name="premiumproducts"),
+    path('premiumproducts/', views.PremiumProducts.as_view(), name="premiumproducts"),
+    
     #search autocomplete
     path('suggestionapi/', views.suggestionApi, name="suggestionapi"),
 
