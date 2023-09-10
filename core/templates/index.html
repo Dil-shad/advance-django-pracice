@@ -123,10 +123,10 @@
 {% block body%}
 
 <main>
-    {% if user.is_authenticated %}
+    {% comment %} {% if user.is_authenticated %}
     <h4>{{ user.name }}</h4>
     {{ request.session.test }}
-{% endif %}
+{% endif %} {% endcomment %}
 
     Hello World!
 

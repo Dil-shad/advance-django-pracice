@@ -109,19 +109,19 @@ WSGI_APPLICATION = 'Ecommerceprojct.wsgi.application'
 DATABASES = {
     # python manage.py dumpdata --exclude auth.permission --exclude contenttypes > data.json
     # python manage.py loaddata data.json  --database=new
-    # 'default': {
-        # 'ENGINE': 'django.db.backends.sqlite3',
-        # 'NAME': BASE_DIR / 'db.sqlite3',
-    # },
-    'default': { #new-renamed-->default
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'TestDatabase',
-        'USER': 'root',
-        'PASSWORD': '',
-        'HOST': '127.0.0.1',
-        'PORT': '3306',
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
-}
+#     'default': { #new-renamed-->default
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'TestDatabase',
+#         'USER': 'root',
+#         'PASSWORD': '',
+#         'HOST': '127.0.0.1',
+#         'PORT': '3306',
+#     }
+ }
 
 
 # Password validation
