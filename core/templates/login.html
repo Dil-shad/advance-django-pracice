@@ -67,8 +67,12 @@
             <label for="id_password" class="login-labels">Password*</label>
             {{ form.password.errors }}
             {{ form.password|addclass:'form-control'|addplaceholder:'Your Password' }}
+            <div class="forgot-password-link mt-1 ">
+                <a href="{% url 'reset_password' %}">Forgot Password?</a>
+            </div>
             <br>
             <button type="submit" class="btn btn-primary btn-lg signup-button">Login</button>
+            
 </form>
 </div>
 </div>
